@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "74335085985",
+    "project_id": "klinik-app-c8244",
+    "storage_bucket": "klinik-app-c8244.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:74335085985:android:e463f15026065ecca317e0",
+        "android_client_info": {
+          "package_name": "com.android.application"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCehIzjQQFAx5zDWHXfeUaBwq_7m_ZB50o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
