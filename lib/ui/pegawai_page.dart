@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../model/pegawai.dart';
-import 'pegawai_detail_page.dart';
-import 'pegawai_item_page.dart';
-import 'pegawai_form_page.dart';
+import '../ui/pegawai_form_page.dart';
+import '../ui/pegawai_item_page.dart';
 import '../widget/sidebar.dart';
+import '../model/pegawai.dart';
+import '../service/pegawai_service.dart';
 
 class PegawaiPage extends StatefulWidget {
   const PegawaiPage({super.key});
@@ -13,55 +13,77 @@ class PegawaiPage extends StatefulWidget {
 }
 
 class _PegawaiPageState extends State<PegawaiPage> {
+  PegawaiService _pegawaiService = PegawaiService();
+  Future<List<Pegawai>>? _pegawaiList;
+  List<Pegawai>? _retrievedPegawaiList;
+
+  Future<void> _initRetrieval() async {
+    _pegawaiList = _pegawaiService.retrievePegawai();
+    _retrievedPegawaiList = await _pegawaiService.retrievePegawai();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initRetrieval();
+  }
+
+  Future refreshData() async {
+    await Future.delayed(Duration(seconds: 1));
+    setState(() {
+      _initRetrieval();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: Sidebar(),
       appBar: AppBar(
-        title: const Text("Data Pegawai"),
+        title: Text("Data Pegawai"),
         actions: [
           GestureDetector(
             child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: const Icon(Icons.add),
+              padding: EdgeInsets.all(8.0),
+              child: Icon(Icons.add),
             ),
-            onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => PegawaiForm()));
+            onTap: (){
+              Navigator.push(context, MaterialPageRoute(builder: (context) => PegawaiForm()));
             },
           )
         ],
       ),
-      body: ListView(
-        children: [
-          PegawaiItem(
-              pegawai: Pegawai(
-                  idPegawai: "001",
-                  nipPegawai: "19220318",
-                  namaPegawai: "Diah Ayu Ambarwati",
-                  tglLahirPegawai: "19 November 2002",
-                  noTlpPegawai: "081223074187",
-                  emailPegawai: "diahayuam@gmail.com",
-                  passwordPegawai: "kepitingrebus")),
-          PegawaiItem(
-              pegawai: Pegawai(
-                  idPegawai: "002",
-                  nipPegawai: "19221798",
-                  namaPegawai: "Manuel Rios Fernandez",
-                  tglLahirPegawai: "17 Desember 1998",
-                  noTlpPegawai: "087754689011",
-                  emailPegawai: "manurios@gmail.com",
-                  passwordPegawai: "lobsterladahitam")),
-          PegawaiItem(
-              pegawai: Pegawai(
-                  idPegawai: "003",
-                  nipPegawai: "19221303",
-                  namaPegawai: "Patrick Quiroz",
-                  tglLahirPegawai: "13 Maret 2000",
-                  noTlpPegawai: "082178689053",
-                  emailPegawai: "patrick@gmail.com",
-                  passwordPegawai: "kerangajaib")),
-        ],
+      body: RefreshIndicator(
+        onRefresh: refreshData,
+        child: FutureBuilder(
+          future: _pegawaiList,
+          builder: (BuildContext context, AsyncSnapshot<List<Pegawai>> snapshot) {
+            if(!snapshot.hasData){
+              return Center(child: CircularProgressIndicator());
+            }
+
+            return ListView.builder(
+              itemCount: _retrievedPegawaiList!.length,
+              itemBuilder: (context, index){
+                var pegawai = _retrievedPegawaiList![index];
+                return Dismissible(
+                  key: UniqueKey(),
+                  background: Container(
+                    color: Colors.redAccent,
+                    alignment: Alignment.centerRight,
+                    padding: EdgeInsets.only(right: 16),
+                    child: Icon(Icons.delete, color: Colors.white,),
+                  ),
+                  onDismissed: (direction){
+                    _pegawaiService.deletePegawai(pegawai.id!);
+                  },
+                  direction: DismissDirection.endToStart,
+                  child: PegawaiItemPage(pegawai: pegawai),
+                );
+              }
+            );
+          }
+        ),
       ),
     );
   }

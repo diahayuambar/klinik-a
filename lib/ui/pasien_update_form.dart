@@ -1,93 +1,90 @@
 import 'package:flutter/material.dart';
+import '../service/pasien_service.dart';
 import '../model/pasien.dart';
-import '/ui/pasien_detail_page.dart';
+import 'pasien_detail_page.dart';
 
 class PasienUpdateForm extends StatefulWidget {
   final Pasien pasien;
-
   const PasienUpdateForm({Key? key, required this.pasien}) : super(key: key);
-  _PasienUpdateFormState createState() => _PasienUpdateFormState();
+
+  @override
+  State<PasienUpdateForm> createState() => _PasienUpdateFormState();
 }
 
 class _PasienUpdateFormState extends State<PasienUpdateForm> {
   final _formKey = GlobalKey<FormState>();
   final _idPasienCtrl = TextEditingController();
-  final _nomorRmPasienCtrl = TextEditingController();
+  final _noRmCtrl = TextEditingController();
   final _namaPasienCtrl = TextEditingController();
   final _tglLahirPasienCtrl = TextEditingController();
   final _noTlpPasienCtrl = TextEditingController();
   final _alamatPasienCtrl = TextEditingController();
 
-  @override
-  void initState() {
+  void initState(){
     super.initState();
     setState(() {
-      _idPasienCtrl.text = widget.pasien.idPasien;
-      _nomorRmPasienCtrl.text = widget.pasien.nomorRm;
-      _namaPasienCtrl.text = widget.pasien.namaPasien;
-      _tglLahirPasienCtrl.text = widget.pasien.tglLahirPasien;
-      _noTlpPasienCtrl.text = widget.pasien.noTlpPasien;
-      _alamatPasienCtrl.text = widget.pasien.alamatPasien;
+      _idPasienCtrl.text = widget.pasien.id!;
+      _noRmCtrl.text = widget.pasien.noRm!;
+      _namaPasienCtrl.text = widget.pasien.nm_pasien!;
+      _tglLahirPasienCtrl.text = widget.pasien.tglLahirPasien!;
+      _noTlpPasienCtrl.text = widget.pasien.noTlpPasien!;
+      _alamatPasienCtrl.text = widget.pasien.alamatPasien!;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Ubah Pasien")),
+      appBar: AppBar(title: Text("Ubah Pasien")),
       body: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [_fieldIdPasien(), SizedBox(height: 20), _tombolSimpan()],
-          ),
+        child: Container(
+          padding: EdgeInsets.fromLTRB(15, 15, 15, 0),
+          child: Form(
+            key: _formKey,
+              child: Column(
+                children: [
+                  _wTextField(namaField: "Nama Pasien", namaController: _namaPasienCtrl, namaIcon: Icons.room_preferences_rounded),
+                  SizedBox(height: 10),
+                  _wTombolUbah()
+                ],
+              )
+              ),
         ),
       ),
     );
   }
 
-  _fieldIdPasien() {
+  Widget _wTextField({required String namaField, required namaController, required namaIcon}){
     return TextField(
-      decoration: const InputDecoration(labelText: "Id Pasien"),
-      controller: _idPasienCtrl,
+      decoration: InputDecoration(
+        labelText: namaField,
+        prefixIcon: Icon(namaIcon),
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10)
+        ),
+      ),
+      controller: namaController,
     );
   }
 
-  _fieldNamaPasien() {
-    return TextField(
-      decoration: const InputDecoration(labelText: "Nama Pasien"),
-      controller: _namaPasienCtrl,
-    );
-  }
-
-  _fieldTgllahirPasien() {
-    return TextField(
-      decoration: const InputDecoration(labelText: "Tanggal Lahir"),
-      controller: _tglLahirPasienCtrl,
-    );
-  }
-
-  _tombolSimpan() {
+  Widget _wTombolUbah(){
     return ElevatedButton(
-        onPressed: () {
-          var text;
-          Pasien pasien = new Pasien(
-              idPasien: _idPasienCtrl.text,
-              nomorRm: _nomorRmPasienCtrl.text,
-              namaPasien: _namaPasienCtrl.text,
-              tglLahirPasien: _tglLahirPasienCtrl.text,
-              noTlpPasien: _noTlpPasienCtrl.text,
-              alamatPasien: _alamatPasienCtrl.text);
-          Navigator.pop(context);
-          Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => PasienDetail(pasien: pasien)));
+        onPressed: () async {
+          Pasien pasien = Pasien(
+            id: _idPasienCtrl.text,
+            noRm: _noRmCtrl.text,
+            nm_pasien: _namaPasienCtrl.text,
+            tglLahirPasien: _tglLahirPasienCtrl.text,
+            noTlpPasien: _noTlpPasienCtrl.text,
+            alamatPasien: _alamatPasienCtrl.text,
+          );
+          await PasienService().updatePasien(pasien).then((value) {
+            Navigator.pushReplacement(context,
+                MaterialPageRoute(builder:
+                    (context) => PasienDetailPage(pasien: pasien)));
+          });
         },
-        child: const Text("Simpan Perubahan"));
+        child: Text("Ubah")
+    );
   }
-}
-
-class _idPasienCtrl {
-  static var text;
 }
